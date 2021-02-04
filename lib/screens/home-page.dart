@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_work_timer/components/button.dart';
 import 'package:my_work_timer/constants/constants.dart';
+import 'package:my_work_timer/model/timer-model.dart';
+import 'package:my_work_timer/utils/timer.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class MyHomePage extends StatelessWidget {
@@ -8,8 +10,11 @@ class MyHomePage extends StatelessWidget {
 
   MyHomePage({this.title});
 
+  final CountDownTimer timer = CountDownTimer();
+
   @override
   Widget build(BuildContext context) {
+    timer.startWork();
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -55,16 +60,24 @@ class MyHomePage extends StatelessWidget {
                   ],
                 ),
                 Expanded(
-                  child: CircularPercentIndicator(
-                    percent: 1,
-                    center: Text(
-                      '23.45',
-                      style: Theme.of(context).textTheme.headline4,
-                    ),
-                    progressColor: kFirstButtonColor,
-                    radius: availableWidth / 2,
-                    lineWidth: 10,
-                  ),
+                  child: StreamBuilder(
+                      initialData: '00:00',
+                      stream: timer.stream(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        TimerModel timerModel = (snapshot.data == '00:00')
+                            ? TimerModel('00:00', 1)
+                            : snapshot.data;
+                        return CircularPercentIndicator(
+                          percent: timerModel.percent,
+                          center: Text(
+                            timerModel.time,
+                            style: Theme.of(context).textTheme.headline4,
+                          ),
+                          progressColor: kFirstButtonColor,
+                          radius: availableWidth / 2,
+                          lineWidth: 10,
+                        );
+                      }),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
